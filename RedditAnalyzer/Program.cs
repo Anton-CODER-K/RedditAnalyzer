@@ -14,11 +14,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-
-
-
-
-
+builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 builder.Services.AddControllers();
 
@@ -34,12 +30,12 @@ builder.Services.AddHttpClient<RedditClient>();
 var app = builder.Build();
 
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 
 
