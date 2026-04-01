@@ -13,42 +13,53 @@ namespace RedditAnalyzer.Clients
         {
             _httpClient = httpClient;
             _logger = logger;
+
+            _httpClient.DefaultRequestHeaders.Clear();
+
+            _httpClient.DefaultRequestHeaders.Add(
+                "User-Agent",
+                "RedditAnalyzer/1.0 (by u/anton_dev)"
+            );
         }
 
         public async Task<List<RedditPost>> GetPosts(string subreddit, int limit)
         {
-           
-
-            var url = $"https://www.reddit.com/{subreddit}.json?limit={limit}";
-
-            _logger.LogInformation("Fetching posts from {Url}", url);
-
-            if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
+            try
             {
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", "RedditApp/1.0");
+
+                var url = $"https://www.reddit.com/{subreddit}.json?limit={limit}";
+
+                _logger.LogInformation("Fetching posts from {Url}", url);
+
+
+
+                var response = await _httpClient.GetAsync(url);
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Error fetching subreddit {Subreddit}. Status: {StatusCode}", subreddit, response.StatusCode);
+                    return new List<RedditPost>();
+                }
+
+                var data = JsonConvert.DeserializeObject<RedditResponse>(content);
+
+                if (data?.Data?.Children == null)
+                {
+                    _logger.LogError("Invalid response structure for {Subreddit}", subreddit);
+                    return new List<RedditPost>();
+                }
+
+
+
+                return data.Data.Children.Select(x => x.Data).ToList();
             }
-
-            var response = await _httpClient.GetAsync(url);
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                _logger.LogError("Error fetching subreddit {Subreddit}. Status: {StatusCode}", subreddit, response.StatusCode);
-                throw new Exception($"Reddit error: {response.StatusCode} | {content}");
+                _logger.LogError(ex, "Error while fetching subreddit {Subreddit}", subreddit);
+                return new List<RedditPost>();
             }
-
-            var data = JsonConvert.DeserializeObject<RedditResponse>(content);
-
-            if (data?.Data?.Children == null)
-            {
-                _logger.LogError("Invalid response structure for {Subreddit}", subreddit);
-                throw new Exception("Invalid Reddit response");
-            }
-
-            
-
-            return data.Data.Children.Select(x => x.Data).ToList();
         }
     }
 }
