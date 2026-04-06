@@ -4,12 +4,12 @@ using System.Text.Json.Serialization;
 
 namespace RedditAnalyzer.Clients
 {
-    public class RedditClient
+    public class RedditJsonClient : IRedditClient
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<RedditClient> _logger;
+        private readonly ILogger<RedditJsonClient> _logger;
 
-        public RedditClient(HttpClient httpClient, ILogger<RedditClient> logger)
+        public RedditJsonClient(HttpClient httpClient, ILogger<RedditJsonClient> logger)
         {
             _httpClient = httpClient;
             _logger = logger;

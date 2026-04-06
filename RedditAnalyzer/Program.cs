@@ -24,7 +24,14 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddScoped<RedditService>();
-builder.Services.AddHttpClient<RedditClient>();
+
+builder.Services.AddScoped<IRedditClient, RedditJsonClient>();
+builder.Services.AddScoped<RedditHtmlClient>();
+
+
+
+builder.Services.AddHttpClient<RedditJsonClient>();
+builder.Services.AddHttpClient<RedditHtmlClient>();
 
 var app = builder.Build();
 

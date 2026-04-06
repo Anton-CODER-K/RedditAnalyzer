@@ -5,16 +5,18 @@ namespace RedditAnalyzer.Service
 {
     public class RedditService
     {
-        private readonly RedditClient _client;
+        private readonly RedditJsonClient _clientJson;
+        private readonly RedditHtmlClient _clientHtml;
         private readonly ILogger<RedditService> _logger;
 
-        public RedditService(RedditClient client, ILogger<RedditService> logger)
+        public RedditService(RedditJsonClient clientJson, RedditHtmlClient clientHtml, ILogger<RedditService> logger)
         {
-            _client = client;
+            _clientJson = clientJson;
+            _clientHtml = clientHtml;
             _logger = logger;
         }
 
-        public async Task<Dictionary<string, List<PostResult>>> AnalyzeAsync(RequestModel request)
+        public async Task<Dictionary<string, List<PostResult>>> AnalyzeJsonAsync(RequestModel request)
         {
             _logger.LogInformation("Starting analysis...");
 
@@ -23,7 +25,7 @@ namespace RedditAnalyzer.Service
             foreach (var item in request.Items)
             {
                 _logger.LogInformation("Processing subreddit {Subreddit}", item.Subreddit);
-                var posts = await _client.GetPosts(item.Subreddit, request.Limit);
+                var posts = await _clientJson.GetPosts(item.Subreddit, request.Limit);
 
 
                 var filtered = posts
@@ -49,6 +51,35 @@ namespace RedditAnalyzer.Service
 
                 result[$"/{item.Subreddit}"] = filtered;
                 _logger.LogInformation("Filtered {Count} posts for {Subreddit}", filtered.Count, item.Subreddit);
+            }
+
+            return result;
+        }
+
+
+        public async Task<Dictionary<string, List<PostResult>>> AnalyzeHtmlAsync(RequestModel request)
+        {
+            _logger.LogInformation("Starting analysis...");
+
+            var result = new Dictionary<string, List<PostResult>>();
+
+            foreach (var item in request.Items)
+            {
+                _logger.LogInformation("Processing subreddit {Subreddit}", item.Subreddit);
+                var posts = await _clientHtml.GetPosts(item.Subreddit, request.Limit, request.Items);
+
+                result[$"/{item.Subreddit}"] = posts.Select(p => new PostResult
+                {
+                    Title = p.Title,
+                    HasMedia =
+                        p.IsVideo ||
+                        (p.Url?.Contains("i.redd.it") == true) ||
+                        (p.Url?.Contains("v.redd.it") == true) ||
+                        (p.Url?.Contains("reddit.com/gallery") == true) ||
+                        (p.Url?.EndsWith(".jpg") == true) ||
+                        (p.Url?.EndsWith(".png") == true) ||
+                        (p.UrlOverriddenByDest?.Contains("i.redd.it") == true)
+                }).ToList();
             }
 
             return result;

@@ -16,12 +16,25 @@ namespace RedditAnalyzer.Controllers
             _logger = logger;
         }
 
-        [HttpPost("analyze")]
-        public async Task<IActionResult> Analyze([FromBody] RequestModel request)
+        [HttpPost("analyze/json")]
+        public async Task<IActionResult> AnalyzeJson([FromBody] RequestModel request)
         {
             _logger.LogInformation("Received request: {@Request}", request);
 
-            var result = await _service.AnalyzeAsync(request);
+            var result = await _service.AnalyzeJsonAsync(request);
+
+            _logger.LogInformation("Returning result with {Count} subreddits", result.Count);
+
+            return Ok(result);
+        }
+
+
+        [HttpPost("analyze/html")]
+        public async Task<IActionResult> AnalyzeHtml([FromBody] RequestModel request)
+        {
+            _logger.LogInformation("Received request: {@Request}", request);
+
+            var result = await _service.AnalyzeHtmlAsync(request);
 
             _logger.LogInformation("Returning result with {Count} subreddits", result.Count);
 
