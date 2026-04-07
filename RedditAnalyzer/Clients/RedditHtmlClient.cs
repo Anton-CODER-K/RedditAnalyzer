@@ -20,13 +20,9 @@ namespace RedditAnalyzer.Clients
             _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
         }
 
-        public async Task<List<RedditPost>> GetPosts(string subreddit, int limit, List<SubredditItem> items)
+        public async Task<List<RedditPost>> GetPosts(string subreddit, int limit, List<string> keywords)
         {
             var posts = new List<RedditPost>();
-
-            var keywords = items
-                .SelectMany(i => i.Keywords)
-                .ToList();
 
             var url = $"https://old.reddit.com/{subreddit}/";
 
@@ -96,20 +92,12 @@ namespace RedditAnalyzer.Clients
                     Domain = domain
                 };
                 posts.Add(post);
-
+                
             }
 
             return posts;
 
-        }
+        }      
 
-
-
-
-
-        //--------------------------------------------------------------
-
-
-      
-    }
+    } 
 }

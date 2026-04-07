@@ -40,5 +40,14 @@ namespace RedditAnalyzer.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("analyze/Playwright")]
+        public async Task<IActionResult> AnalyzePlaywright([FromBody] RequestModel request)
+        {
+            _logger.LogInformation("Received request: {@Request}", request);
+            var result = await _service.AnalyzePlaywrightAsync(request);
+            _logger.LogInformation("Returning result with {Count} subreddits", result.Count);
+            return Ok(result);
+        }
     }
 }

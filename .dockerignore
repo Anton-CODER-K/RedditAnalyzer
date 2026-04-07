@@ -1,4 +1,11 @@
-node_modules/
-*.log
 bin/
 obj/
+.git/
+.vs/
+
+.git/
+.gitignore
+
+docker-compose*
+Dockerfile
+.dockerignore

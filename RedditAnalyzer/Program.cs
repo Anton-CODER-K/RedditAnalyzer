@@ -9,7 +9,7 @@ Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.File("Logs/out-.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File("logs/out-.log", rollingInterval: RollingInterval.Day)
                .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -32,6 +32,7 @@ builder.Services.AddScoped<RedditHtmlClient>();
 
 builder.Services.AddHttpClient<RedditJsonClient>();
 builder.Services.AddHttpClient<RedditHtmlClient>();
+builder.Services.AddScoped<RedditPlaywrightClient>();
 
 var app = builder.Build();
 
@@ -53,5 +54,13 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
+
+//var client = new RedditPlaywrightClient();
+//var result = await client.GetPost("r/programming", 100, null);
+
+//foreach (var post in result ?? [])
+//{
+//    Console.WriteLine(post.Title);
+//}
 
 app.Run();
